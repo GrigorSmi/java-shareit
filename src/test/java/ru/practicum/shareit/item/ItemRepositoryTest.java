@@ -35,14 +35,14 @@ class ItemRepositoryTest {
 
     @Test
     void shouldSearchOnlyAvailableItemsCaseInsensitive() {
-        repository.save(new Item(null, "Drill Pro", "Power 600 watt", true, 1L));
-        repository.save(new Item(null, "Drill Old", "Power 100 watt", false, 1L));
-        repository.save(new Item(null, "Hammer", "Big", true, 1L));
+        repository.save(new Item(null, "Дрель ПРО", "Мощность 600 Вт", true, 1L));
+        repository.save(new Item(null, "Дрель б/у", "Мощность 100 Вт", false, 1L));
+        repository.save(new Item(null, "Молоток", "Большой", true, 1L));
 
-        List<Item> result = repository.search("drill");
+        List<Item> result = repository.search("дрель");
 
         assertEquals(1, result.size());
-        assertEquals("Drill Pro", result.get(0).getName());
+        assertEquals("Дрель ПРО", result.get(0).getName());
     }
 
     @Test
@@ -56,7 +56,7 @@ class ItemRepositoryTest {
 
     @Test
     void shouldReturnEmptyForBlankText() {
-        repository.save(new Item(null, "Drill", "Power", true, 1L));
+        repository.save(new Item(null, "Дрель", "Мощность", true, 1L));
 
         assertTrue(repository.search(null).isEmpty());
         assertTrue(repository.search("   ").isEmpty());

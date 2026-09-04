@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -120,26 +121,27 @@ class ItemControllerTest {
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     void shouldSearchOnlyAvailableItemsCaseInsensitive() throws Exception {
         long userId = createUser("Owner", "owner5@mail.com");
 
-        ItemDto availableItem = new ItemDto(null, "Drill Pro", "Power 600 watt", true);
+        ItemDto availableItem = new ItemDto(null, "Дрель ПРО", "Мощность 600 Вт", true);
         mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(availableItem)))
                 .andExpect(status().isCreated());
 
-        ItemDto unavailableItem = new ItemDto(null, "Drill Old", "Power 100 watt", false);
+        ItemDto unavailableItem = new ItemDto(null, "Дрель б/у", "Мощность 100 Вт", false);
         mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(unavailableItem)))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(get("/items/search").param("text", "drill"))
+        mockMvc.perform(get("/items/search").param("text", "дрель"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].name").value("Drill Pro"));
+                .andExpect(jsonPath("$[0].name").value("Дрель ПРО"));
     }
 }

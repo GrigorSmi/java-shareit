@@ -14,7 +14,7 @@ class ItemRepositoryTest {
 
     @Test
     void shouldSaveAndAssignId() {
-        Item item = new Item(null, "Дрель", "Мощность 600 вт", true, 1L);
+        Item item = new Item(null, "Дрель", "Мощность 600 вт", true, 1L, null);
 
         Item saved = repository.save(item);
 
@@ -24,9 +24,9 @@ class ItemRepositoryTest {
 
     @Test
     void shouldFindByOwnerId() {
-        repository.save(new Item(null, "Дрель", "Мощность 600 вт", true, 1L));
-        repository.save(new Item(null, "Отвертка", "Аккумуляторная", true, 1L));
-        repository.save(new Item(null, "Перфоратор", "Мощный", true, 2L));
+        repository.save(new Item(null, "Дрель", "Мощность 600 вт", true, 1L, null));
+        repository.save(new Item(null, "Отвертка", "Аккумуляторная", true, 1L, null));
+        repository.save(new Item(null, "Перфоратор", "Мощный", true, 2L, null));
 
         List<Item> ownerItems = repository.findByOwnerId(1L);
 
@@ -35,9 +35,9 @@ class ItemRepositoryTest {
 
     @Test
     void shouldSearchOnlyAvailableItemsCaseInsensitive() {
-        repository.save(new Item(null, "Дрель ПРО", "Мощность 600 Вт", true, 1L));
-        repository.save(new Item(null, "Дрель б/у", "Мощность 100 Вт", false, 1L));
-        repository.save(new Item(null, "Молоток", "Большой", true, 1L));
+        repository.save(new Item(null, "Дрель ПРО", "Мощность 600 Вт", true, 1L, null));
+        repository.save(new Item(null, "Дрель б/у", "Мощность 100 Вт", false, 1L, null));
+        repository.save(new Item(null, "Молоток", "Большой", true, 1L, null));
 
         List<Item> result = repository.search("дрель");
 
@@ -47,7 +47,7 @@ class ItemRepositoryTest {
 
     @Test
     void shouldSearchInDescription() {
-        repository.save(new Item(null, "Инструмент", "Аккумуляторная отвертка", true, 1L));
+        repository.save(new Item(null, "Инструмент", "Аккумуляторная отвертка", true, 1L, null));
 
         List<Item> result = repository.search("аккумулятор");
 
@@ -56,10 +56,11 @@ class ItemRepositoryTest {
 
     @Test
     void shouldReturnEmptyForBlankText() {
-        repository.save(new Item(null, "Дрель", "Мощность", true, 1L));
+        repository.save(new Item(null, "Дрель", "Мощность", true, 1L, null));
 
         assertTrue(repository.search(null).isEmpty());
         assertTrue(repository.search("   ").isEmpty());
         assertTrue(repository.search("").isEmpty());
     }
 }
+

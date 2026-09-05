@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.request.ItemRequest;
 
 @Data
 @NoArgsConstructor
@@ -22,4 +23,6 @@ public class Item {
     private Boolean available;
 
     private Long owner;
+
+    private ItemRequest request;
 }

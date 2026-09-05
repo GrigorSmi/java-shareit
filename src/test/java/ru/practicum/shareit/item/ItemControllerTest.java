@@ -40,7 +40,7 @@ class ItemControllerTest {
     @Test
     void shouldCreateItem() throws Exception {
         long userId = createUser("Owner", "owner@mail.com");
-        ItemDto item = new ItemDto(null, "Дрель", "Мощность 600 вт", true);
+        ItemDto item = new ItemDto(null, "Дрель", "Мощность 600 вт", true, null);
 
         mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", userId)
@@ -54,7 +54,7 @@ class ItemControllerTest {
 
     @Test
     void shouldReturn404WhenCreateItemWithNonExistentUser() throws Exception {
-        ItemDto item = new ItemDto(null, "Дрель", "Мощность 600 вт", true);
+        ItemDto item = new ItemDto(null, "Дрель", "Мощность 600 вт", true, null);
 
         mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", 999)
@@ -80,7 +80,7 @@ class ItemControllerTest {
         long ownerId = createUser("Owner", "owner3@mail.com");
         long otherId = createUser("Other", "other@mail.com");
 
-        ItemDto item = new ItemDto(null, "Дрель", "Мощность 600 вт", true);
+        ItemDto item = new ItemDto(null, "Дрель", "Мощность 600 вт", true, null);
         String created = mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", ownerId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,7 +89,7 @@ class ItemControllerTest {
                 .andReturn().getResponse().getContentAsString();
         long itemId = objectMapper.readTree(created).get("id").asLong();
 
-        ItemDto update = new ItemDto(null, "Чужое имя", null, null);
+        ItemDto update = new ItemDto(null, "Чужое имя", null, null, null);
         mockMvc.perform(patch("/items/" + itemId)
                         .header("X-Sharer-User-Id", otherId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -101,7 +101,7 @@ class ItemControllerTest {
     void shouldUpdateItemByOwner() throws Exception {
         long userId = createUser("Owner", "owner4@mail.com");
 
-        ItemDto item = new ItemDto(null, "Дрель", "Мощность 600 вт", true);
+        ItemDto item = new ItemDto(null, "Дрель", "Мощность 600 вт", true, null);
         String created = mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -110,7 +110,7 @@ class ItemControllerTest {
                 .andReturn().getResponse().getContentAsString();
         long itemId = objectMapper.readTree(created).get("id").asLong();
 
-        ItemDto update = new ItemDto(null, "Новое имя", null, false);
+        ItemDto update = new ItemDto(null, "Новое имя", null, false, null);
         mockMvc.perform(patch("/items/" + itemId)
                         .header("X-Sharer-User-Id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -120,19 +120,42 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.available").value(false));
     }
 
+@Test
+    void shouldNotOverwriteNameAndDescriptionWithBlank() throws Exception {
+long userId = createUser("Owner", "owner6@mail.com");
+
+        ItemDto item = new ItemDto(null, "Дрель", "Мощность 600 вт", true, null);
+        String created = mockMvc.perform(post("/items")
+                        .header("X-Sharer-User-Id", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(item)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        long itemId = objectMapper.readTree(created).get("id").asLong();
+
+        ItemDto update = new ItemDto(null, "  ", " ", null, null);
+        mockMvc.perform(patch("/items/" + itemId)
+                        .header("X-Sharer-User-Id", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(update)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Дрель"))
+                .andExpect(jsonPath("$.description").value("Мощность 600 вт"));
+    }
+
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     void shouldSearchOnlyAvailableItemsCaseInsensitive() throws Exception {
         long userId = createUser("Owner", "owner5@mail.com");
 
-        ItemDto availableItem = new ItemDto(null, "Дрель ПРО", "Мощность 600 Вт", true);
+        ItemDto availableItem = new ItemDto(null, "Дрель ПРО", "Мощность 600 Вт", true, null);
         mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(availableItem)))
                 .andExpect(status().isCreated());
 
-        ItemDto unavailableItem = new ItemDto(null, "Дрель б/у", "Мощность 100 Вт", false);
+        ItemDto unavailableItem = new ItemDto(null, "Дрель б/у", "Мощность 100 Вт", false, null);
         mockMvc.perform(post("/items")
                         .header("X-Sharer-User-Id", userId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -145,3 +168,4 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$[0].name").value("Дрель ПРО"));
     }
 }
+

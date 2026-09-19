@@ -85,9 +85,7 @@ public class ItemServiceImpl implements ItemService {
             nextBooking = findNextBooking(itemId);
         }
 
-        List<CommentDto> comments = commentRepository.findByItem_Id(itemId).stream()
-                .map(this::toCommentDto)
-                .collect(Collectors.toList());
+        List<CommentDto> comments = findComments(itemId);
 
         return new ItemDetailsDto(item.getId(), item.getName(), item.getDescription(),
                 item.getAvailable(), lastBooking, nextBooking, comments);
@@ -103,7 +101,8 @@ public class ItemServiceImpl implements ItemService {
                         item.getDescription(),
                         item.getAvailable(),
                         findLastBooking(item.getId()),
-                        findNextBooking(item.getId())))
+                        findNextBooking(item.getId()),
+                        findComments(item.getId())))
                 .collect(Collectors.toList());
     }
 
@@ -152,6 +151,12 @@ public class ItemServiceImpl implements ItemService {
                 .min(Comparator.comparing(Booking::getStart))
                 .map(this::toItemBookingDto)
                 .orElse(null);
+    }
+
+    private List<CommentDto> findComments(Long itemId) {
+        return commentRepository.findByItem_Id(itemId).stream()
+                .map(this::toCommentDto)
+                .collect(Collectors.toList());
     }
 
     private ItemBookingDto toItemBookingDto(Booking booking) {

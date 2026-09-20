@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDetailsDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemOwnerDto;
 
 import java.util.List;
 
@@ -52,7 +51,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemOwnerDto>> getItemsByOwner(
+    public ResponseEntity<List<ItemDetailsDto>> getItemsByOwner(
             @RequestHeader("X-Sharer-User-Id") Long userId) {
         return ResponseEntity.ok(itemService.getItemsByOwner(userId));
     }
@@ -66,7 +65,7 @@ public class ItemController {
     public ResponseEntity<CommentDto> addComment(
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @PathVariable Long itemId,
-            @RequestBody CommentDto commentDto) {
+            @Valid @RequestBody CommentDto commentDto) {
         return ResponseEntity.ok(itemService.addComment(userId, itemId, commentDto));
     }
 }

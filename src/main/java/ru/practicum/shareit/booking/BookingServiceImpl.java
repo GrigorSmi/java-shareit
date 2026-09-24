@@ -44,6 +44,11 @@ public class BookingServiceImpl implements BookingService {
         if (!Boolean.TRUE.equals(item.getAvailable())) {
             throw new IllegalArgumentException("Вещь недоступна для бронирования");
         }
+        LocalDateTime now = LocalDateTime.now();
+        if (requestDto.getStart().isBefore(now.minusSeconds(1))
+                || requestDto.getEnd().isBefore(now.minusSeconds(1))) {
+            throw new IllegalArgumentException("Даты бронирования не могут быть в прошлом");
+        }
         if (!requestDto.getStart().isBefore(requestDto.getEnd())) {
             throw new IllegalArgumentException("Дата начала должна быть раньше даты окончания");
         }

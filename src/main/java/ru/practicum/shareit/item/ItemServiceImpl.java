@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -101,7 +102,7 @@ public class ItemServiceImpl implements ItemService {
 
         LocalDateTime now = LocalDateTime.now();
         Map<Long, List<Booking>> bookingsByItem = bookingRepository
-                .findByItem_Owner_IdAndStatus(userId, BookingStatus.APPROVED).stream()
+                .findByItem_Owner_IdAndStatus(userId, BookingStatus.APPROVED, Sort.unsorted()).stream()
                 .collect(Collectors.groupingBy(booking -> booking.getItem().getId()));
         Map<Long, List<Comment>> commentsByItem = commentRepository
                 .findByItem_Owner_Id(userId).stream()

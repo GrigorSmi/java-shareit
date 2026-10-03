@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -31,7 +32,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler({MissingServletRequestParameterException.class, MissingRequestHeaderException.class})
-    public ResponseEntity<Map<String, String>> handleMissingParam(RuntimeException e) {
+    public ResponseEntity<Map<String, String>> handleMissingParam(ServletRequestBindingException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", e.getMessage()));
     }

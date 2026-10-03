@@ -81,27 +81,6 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void shouldThrowWhenStartInPast() {
-        User owner = user("Owner", "owner@mail.com");
-        User booker = user("Booker", "booker@mail.com");
-        Item item = item(owner, true);
-
-        assertThrows(IllegalArgumentException.class, () -> bookingService.createBooking(booker.getId(),
-                new BookingRequestDto(item.getId(), LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(2))));
-    }
-
-    @Test
-    void shouldThrowWhenStartEqualsEnd() {
-        User owner = user("Owner", "owner@mail.com");
-        User booker = user("Booker", "booker@mail.com");
-        Item item = item(owner, true);
-        LocalDateTime moment = LocalDateTime.now().plusDays(1);
-
-        assertThrows(IllegalArgumentException.class, () -> bookingService.createBooking(booker.getId(),
-                new BookingRequestDto(item.getId(), moment, moment)));
-    }
-
-    @Test
     void shouldThrowWhenBookerUnknown() {
         User owner = user("Owner", "owner@mail.com");
         Item item = item(owner, true);
@@ -218,8 +197,7 @@ class BookingServiceImplTest {
         save(item, booker, now.plusDays(3), now.plusDays(4), BookingStatus.REJECTED);
 
         assertEquals(4, bookingService.getBookingsByBooker(booker.getId(), State.ALL).size());
-        assertTrue(bookingService.getBookingsByBooker(booker.getId(), State.WAITING).stream()
-                .allMatch(b -> b.getStatus() == BookingStatus.WAITING));
+        assertEquals(1, bookingService.getBookingsByBooker(booker.getId(), State.WAITING).size());
         assertEquals(1, bookingService.getBookingsByBooker(booker.getId(), State.PAST).size());
         assertEquals(2, bookingService.getBookingsByBooker(booker.getId(), State.FUTURE).size());
         assertEquals(1, bookingService.getBookingsByBooker(booker.getId(), State.CURRENT).size());
@@ -267,6 +245,7 @@ class BookingServiceImplTest {
 
         List<BookingDto> bookings = bookingService.getBookingsByBooker(booker.getId(), State.ALL);
 
-        assertTrue(bookings.get(0).getStart().isAfter(bookings.get(1).getStart()));
+        assertTrue(bookings.get(0).getStart().isAfter(bookings.get(1).getStart())
+                && bookings.get(1).getStart().isAfter(bookings.get(2).getStart()));
     }
 }

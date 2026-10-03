@@ -53,7 +53,7 @@ class ItemRequestServiceImplTest {
         assertNotNull(created.getId());
         assertEquals("Нужна дрель", created.getDescription());
         assertNotNull(created.getCreated());
-        assertEquals(1, requestRepository.findAll().size());
+        assertTrue(requestRepository.findById(created.getId()).isPresent());
     }
 
     @Test

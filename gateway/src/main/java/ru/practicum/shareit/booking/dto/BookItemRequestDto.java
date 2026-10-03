@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ValidBookingDates
 public class BookItemRequestDto {
     @NotNull
     private Long itemId;

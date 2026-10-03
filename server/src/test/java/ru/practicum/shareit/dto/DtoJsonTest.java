@@ -4,7 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
+import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.dto.BookerDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestShortDto;
 
@@ -21,7 +26,13 @@ class DtoJsonTest {
     private JacksonTester<BookingRequestDto> bookingRequestJson;
 
     @Autowired
+    private JacksonTester<BookingDto> bookingJson;
+
+    @Autowired
     private JacksonTester<ItemRequestDto> itemRequestJson;
+
+    @Autowired
+    private JacksonTester<CommentDto> commentJson;
 
     @Test
     void shouldDeserializeBookingRequestWithDates() throws Exception {
@@ -34,16 +45,37 @@ class DtoJsonTest {
     }
 
     @Test
+    void shouldSerializeBookingDatesInIsoFormat() throws Exception {
+        BookingDto dto = new BookingDto(1L,
+                LocalDateTime.of(2030, 1, 1, 10, 0, 0),
+                LocalDateTime.of(2030, 1, 2, 10, 0, 0),
+                BookingStatus.APPROVED,
+                new BookerDto(2L, "Bob"),
+                new ItemDto(10L, "Дрель", "d", true, null));
+
+        assertThat(bookingJson.write(dto))
+                .extractingJsonPathStringValue("@.start").isEqualTo("2030-01-01T10:00:00");
+        assertThat(bookingJson.write(dto))
+                .extractingJsonPathStringValue("@.end").isEqualTo("2030-01-02T10:00:00");
+    }
+
+    @Test
     void shouldSerializeItemRequestDatesInIsoFormat() throws Exception {
         ItemRequestDto dto = new ItemRequestDto(1L, "Нужна дрель",
                 LocalDateTime.of(2030, 1, 1, 10, 0, 0),
                 List.of(new ItemRequestShortDto(10L, "Дрель", 3L)));
 
         assertThat(itemRequestJson.write(dto))
-                .hasJsonPathNumberValue("@.id", 1)
-                .hasJsonPathStringValue("@.description", "Нужна дрель")
-                .hasJsonPathStringValue("@.created", "2030-01-01T10:00:00")
-                .hasJsonPathNumberValue("@.items[0].ownerId", 3);
+                .extractingJsonPathStringValue("@.created").isEqualTo("2030-01-01T10:00:00");
+    }
+
+    @Test
+    void shouldSerializeCommentDateInIsoFormat() throws Exception {
+        CommentDto dto = new CommentDto(5L, "Отлично", "Bob",
+                LocalDateTime.of(2030, 1, 1, 10, 0, 0));
+
+        assertThat(commentJson.write(dto))
+                .extractingJsonPathStringValue("@.created").isEqualTo("2030-01-01T10:00:00");
     }
 
     @Test

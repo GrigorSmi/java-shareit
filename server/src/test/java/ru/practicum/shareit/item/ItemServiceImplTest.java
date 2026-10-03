@@ -169,14 +169,32 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void shouldGetItemsByOwner() {
+    void shouldGetItemsByOwnerWithBookingsAndCommentsOnlyForRelatedItem() {
         User owner = user("Owner", "owner@mail.com");
-        createItem(owner.getId());
-        createItem(owner.getId());
+        User booker = user("Booker", "booker@mail.com");
+        ItemDto first = createItem(owner.getId());
+        ItemDto second = itemService.createItem(owner.getId(),
+                new ItemDto(null, "Отвертка", "Аккумуляторная", true, null));
+        Item firstItem = reload(first.getId());
+
+        finishedBooking(firstItem, booker);
+        bookingRepository.save(new Booking(null, LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2), firstItem, booker, BookingStatus.APPROVED));
+        itemService.addComment(booker.getId(), firstItem.getId(), new CommentDto(null, "Отлично", null, null));
 
         List<ItemDetailsDto> items = itemService.getItemsByOwner(owner.getId());
 
         assertEquals(2, items.size());
+        ItemDetailsDto withData = items.stream()
+                .filter(item -> item.getId().equals(first.getId())).findFirst().orElseThrow();
+        ItemDetailsDto empty = items.stream()
+                .filter(item -> item.getId().equals(second.getId())).findFirst().orElseThrow();
+        assertNotNull(withData.getLastBooking());
+        assertNotNull(withData.getNextBooking());
+        assertEquals(1, withData.getComments().size());
+        assertNull(empty.getLastBooking());
+        assertNull(empty.getNextBooking());
+        assertEquals(0, empty.getComments().size());
     }
 
     @Test

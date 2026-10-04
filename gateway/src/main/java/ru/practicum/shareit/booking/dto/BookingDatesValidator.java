@@ -21,8 +21,17 @@ public class BookingDatesValidator implements ConstraintValidator<ValidBookingDa
         // чтобы не падал CI, а то уже было: допускаем отставание до секунды
         if (start.isBefore(now.minusSeconds(TOLERANCE_SECONDS))
                 || end.isBefore(now.minusSeconds(TOLERANCE_SECONDS))) {
-            return false;
+            return violation(context, "Даты бронирования не могут быть в прошлом");
         }
-        return start.isBefore(end);
+        if (!start.isBefore(end)) {
+            return violation(context, "Дата начала должна быть раньше даты окончания");
+        }
+        return true;
+    }
+
+    private boolean violation(ConstraintValidatorContext context, String message) {
+        context.disableDefaultConstraintViolation();
+        context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+        return false;
     }
 }

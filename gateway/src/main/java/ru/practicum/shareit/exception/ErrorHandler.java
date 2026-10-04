@@ -11,14 +11,18 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 @RestControllerAdvice
 public class ErrorHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException e) {
-        String message = e.getBindingResult().getFieldErrors().stream()
-                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+        String message = Stream.concat(
+                        e.getBindingResult().getFieldErrors().stream()
+                                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage()),
+                        e.getBindingResult().getGlobalErrors().stream()
+                                .map(ge -> ge.getDefaultMessage()))
                 .findFirst()
                 .orElse("Validation error");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)

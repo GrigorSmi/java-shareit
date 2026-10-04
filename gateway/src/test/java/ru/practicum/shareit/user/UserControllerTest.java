@@ -84,6 +84,26 @@ class UserControllerTest {
     }
 
     @Test
+    void shouldReturn400WhenUpdateNameBlank() throws Exception {
+        mockMvc.perform(patch("/users/1")
+                        .contentType("application/json")
+                        .content("{\"name\":\"  \"}"))
+                .andExpect(status().isBadRequest());
+
+        verify(userClient, never()).update(anyLong(), any());
+    }
+
+    @Test
+    void shouldReturn400WhenUpdateEmailBlank() throws Exception {
+        mockMvc.perform(patch("/users/1")
+                        .contentType("application/json")
+                        .content("{\"email\":\"\"}"))
+                .andExpect(status().isBadRequest());
+
+        verify(userClient, never()).update(anyLong(), any());
+    }
+
+    @Test
     void shouldGetUser() throws Exception {
         when(userClient.get(1L)).thenReturn(ResponseEntity.ok(Map.of("id", 1)));
 

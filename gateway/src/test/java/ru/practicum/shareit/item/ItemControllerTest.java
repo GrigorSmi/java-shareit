@@ -83,6 +83,30 @@ class ItemControllerTest {
     }
 
     @Test
+    void shouldReturn400WhenUpdateNameTooLong() throws Exception {
+        String longName = "a".repeat(256);
+
+        mockMvc.perform(patch("/items/10")
+                        .header("X-Sharer-User-Id", 1L)
+                        .contentType("application/json")
+                        .content("{\"name\":\"" + longName + "\"}"))
+                .andExpect(status().isBadRequest());
+
+        verify(itemClient, never()).update(anyLong(), anyLong(), any());
+    }
+
+    @Test
+    void shouldReturn400WhenUpdateNameBlank() throws Exception {
+        mockMvc.perform(patch("/items/10")
+                        .header("X-Sharer-User-Id", 1L)
+                        .contentType("application/json")
+                        .content("{\"name\":\"  \"}"))
+                .andExpect(status().isBadRequest());
+
+        verify(itemClient, never()).update(anyLong(), anyLong(), any());
+    }
+
+    @Test
     void shouldGetItem() throws Exception {
         when(itemClient.get(1L, 10L)).thenReturn(ResponseEntity.ok(Map.of("id", 10)));
 

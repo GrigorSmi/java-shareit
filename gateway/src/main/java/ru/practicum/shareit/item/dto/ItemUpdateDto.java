@@ -1,6 +1,5 @@
-package ru.practicum.shareit.user.dto;
+package ru.practicum.shareit.item.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,13 +9,14 @@ import ru.practicum.shareit.validation.NotBlankIfPresent;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserUpdateDto {
+public class ItemUpdateDto {
     @NotBlankIfPresent
     @Size(max = 255)
     private String name;
 
     @NotBlankIfPresent
-    @Email
     @Size(max = 512)
-    private String email;
+    private String description;
+
+    private Boolean available;
 }
